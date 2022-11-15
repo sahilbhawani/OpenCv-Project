@@ -8,9 +8,6 @@ import time
 from cvzone.HandTrackingModule import HandDetector
 import cvzone
 import math
-from ctypes import cast, POINTER
-from comtypes import CLSCTX_ALL
-from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 import HandTrackingModule as htm
 
 
@@ -52,17 +49,7 @@ class VideoProcessor:
     detector2 = HandDetector(detectionCon=0.8, maxHands=2)
     detector = htm.handDetector(detectionCon=0.8,maxHands=2)
     devices = AudioUtilities.GetSpeakers()
-    interface = devices.Activate(
-    IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-    volume = cast(interface, POINTER(IAudioEndpointVolume))
 
-    volRange = volume.GetVolumeRange()
-
-    minVol = volRange[0]
-    maxVol = volRange[1]
-    vol = 0
-    volBar = 400
-    volPer = 0
     x = [300, 245, 200, 170, 145, 130, 112, 103, 93, 87, 80, 75, 70, 67, 62, 59, 57]
     y = [20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]
     coff = np.polyfit(x, y, 2)  # y = Ax^2 + Bx + C
@@ -116,42 +103,7 @@ class VideoProcessor:
             else:
                 position = self.detector.findPosition(img, draw=False)
                 cvzone.putTextRect(img, f'{int(closehand[0])} cm', (50,100))
-       
-    # Volume Control
-
-        if len(position) != 0:
-
-            xa1, ya1 = position[4][1], position[4][2]
-            xa2, ya2 = position[8][1], position[8][2]
-            cx, cy = (xa1 + xa2) // 2, (ya1 + ya2) // 2
-
-
-            cv2.circle(img, (xa1, ya1), 15, (255, 0, 255), cv2.FILLED)
-            cv2.circle(img, (xa2, ya2), 15, (255, 0, 255), cv2.FILLED)
-            cv2.line(img, (xa1, ya1), (xa2, ya2), (255, 0, 255), 3)
-            cv2.circle(img, (cx, cy), 15, (255, 0, 255), cv2.FILLED)
-
-            length = math.hypot(xa2 - xa1, ya2 - ya1)
-
-        # Hand range 50 - 235
-        # Volume Range -65 - 0
-
-            self.vol = np.interp(length, [50, 235], [self.minVol, self.maxVol])
-
-            self.volBar = np.interp(length, [50, 235], [400, 150])
-            self.volPer = np.interp(length, [50, 235], [0, 100])
-
-            self.volume.SetMasterVolumeLevel(self.vol, None)
-
-            if length < 50:
-                cv2.circle(img, (cx, cy), 15, (0, 255, 0), cv2.FILLED)
-
-        cv2.rectangle(img, (50, 150), (85, 400), (255, 0, 0), 3)
-        cv2.rectangle(img, (50, int(self.volBar)), (85, 400), (255, 0, 0), cv2.FILLED)
-        cv2.putText(img, f'{int(self.volPer)} %', (40, 450), cv2.FONT_HERSHEY_COMPLEX,
-                1, (255, 0, 0), 3)
-
-
+    
         return av.VideoFrame.from_ndarray(img, format="bgr24")
 
 def main():
