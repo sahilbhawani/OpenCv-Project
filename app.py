@@ -48,7 +48,6 @@ class VideoProcessor:
 
     detector2 = HandDetector(detectionCon=0.8, maxHands=2)
     detector = htm.handDetector(detectionCon=0.8,maxHands=2)
-    devices = AudioUtilities.GetSpeakers()
 
     x = [300, 245, 200, 170, 145, 130, 112, 103, 93, 87, 80, 75, 70, 67, 62, 59, 57]
     y = [20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]
